@@ -31,21 +31,21 @@ namespace RepairAtWorkbench
             {
                 "HandTailoringBench",
                 new List<(string, string, int)> {
-                    ("Apparel_PsyfocusHelmet", "Crafting", 12),
-                    ("Apparel_EltexSkullcap", "Crafting", 12),
-                    ("Apparel_PsyfocusShirt", "Crafting", 12),
-                    ("Apparel_PsyfocusVest", "Crafting", 12),
-                    ("Apparel_PsyfocusRobe", "Crafting", 12)
+                    ("Apparel_PsyfocusHelmet", "Crafting", 8),
+                    ("Apparel_EltexSkullcap", "Crafting", 8),
+                    ("Apparel_PsyfocusShirt", "Crafting", 8),
+                    ("Apparel_PsyfocusVest", "Crafting", 8),
+                    ("Apparel_PsyfocusRobe", "Crafting", 8)
                 }
             },
             {
                 "ElectricTailoringBench",
                 new List<(string, string, int)> {
-                    ("Apparel_PsyfocusHelmet", "Crafting", 12),
-                    ("Apparel_EltexSkullcap", "Crafting", 12),
-                    ("Apparel_PsyfocusShirt", "Crafting", 12),
-                    ("Apparel_PsyfocusVest", "Crafting", 12),
-                    ("Apparel_PsyfocusRobe", "Crafting", 12)
+                    ("Apparel_PsyfocusHelmet", "Crafting", 8),
+                    ("Apparel_EltexSkullcap", "Crafting", 8),
+                    ("Apparel_PsyfocusShirt", "Crafting", 8),
+                    ("Apparel_PsyfocusVest", "Crafting", 8),
+                    ("Apparel_PsyfocusRobe", "Crafting", 8)
                 }
             }
         };
@@ -123,6 +123,9 @@ namespace RepairAtWorkbench
             } else if (skillDiffCategory == 3)
             {
                 label = "Repair hyper-advanced " + skill.label + " items";
+            } else 
+            {
+                label = "Repair impossibly high-skilled (" + skillDiffCategory + ") " + skill.label + " items";
             }
 
             if (repairablesForWorkbenchAndWg.Count == 0) { return; }
@@ -180,6 +183,7 @@ namespace RepairAtWorkbench
             SetIngredientsForRepair(repairRecipe, repairablesForWorkbenchAndWg.Select(x => x.Item2));
             repairRecipe.fixedIngredientFilter.SetAllowAll(repairRecipe.ingredients.First().filter);
             repairRecipe.defaultIngredientFilter.SetAllowAll(repairRecipe.ingredients.First().filter);
+            repairRecipe.defaultIngredientFilter.SetAllow(SpecialThingFilterDefOf.AllowDeadmansApparel, false);
 
             repairRecipe.recipeUsers.Add(workBenchDef);
             DefDatabase<RecipeDef>.Add(repairRecipe);
