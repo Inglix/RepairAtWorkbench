@@ -11,3 +11,8 @@ That's why I was so happy to find the Repair at Crafting Bench mod. Finally you 
 * New configurable repair bills are added to existing workbenches to give you full control over item repair jobs
 * Different repair bills are created to group items by their crafting skill requirements
 * Repairing only requires time and doesn't consume any type of crafting resources
+
+## Compatibility
+* Should be compatible with just about anything. Mods which add new workbenches or crafting recipes should be handled automatically.
+* Likely won't clash with other item repair mods, but why would you do that?
+* Safe to add to existing saves. Before attempting removal you should delete any existing repair bills from all workbenches.
