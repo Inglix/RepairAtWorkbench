@@ -17,14 +17,25 @@ That's why I was so happy to find the Repair at Crafting Bench mod. Finally you 
 * Likely won't clash with other item repair mods, but why would you do that?
 * Safe to add to existing saves. Before attempting removal you should delete any existing repair bills from all workbenches.
 
+## Bug Reports
+If you believe you have discovered a bug in this mod, please report it and include the following at minimum:
+* Detailed description of the bug and how to reproduce it.
+* Link to your HugsLib log file
+  * Have either [HugsLib](https://steamcommunity.com/sharedfiles/filedetails/818773962) or [Log Publisher from HugsLib](https://steamcommunity.com/sharedfiles/filedetails/2873415404) in your active mod list.
+  * Press _Ctrl-F12_ in-game after the bug occurs and then follow the on-screen instructions.
+
 ## Credits
 ### swwu (Steven Wu)
 The author of the original [Repair at Crafting Bench](https://steamcommunity.com/sharedfiles/filedetails/?id=3222153156) mod which this continuation is based on.
 ### NotFood (Charlotte)
 The author of [MendAndRecyle](https://steamcommunity.com/sharedfiles/filedetails/?id=735241897) which was active from RimWorld version A14 all the way to 1.4. Repair at Crafting Bench was forked from this mod so it wouldn't exist without MendAndRecycle.
+### KiameV
+Credited by NotFood as having provided support for the development of MendAndRecycle.
+### Syrchalis
+Credited by NotFood for contributing textures for MendAndRecycle. Those textures aren't used in Repair at Crafting Bench, but they still deserve credit for their contributions.
 ### topp2000
-Author of the A13 update of [Wastelander's Minor Mods: Mending](https://ludeon.com/forums/index.php?topic=19594.0) which MendAndRecycle was based on.
+The author of the A13 update of [Wastelander's Minor Mods: Mending](https://ludeon.com/forums/index.php?topic=19594.0) which MendAndRecycle was based on.
 ### Skyarkhangel
-Author of the A12 update of Wastelander's Minor Mods: Mending.
+The author of the A12 update of Wastelander's Minor Mods: Mending.
 ### Wastelander
 The original creator of Wasterlander's Minor Mods: Mending.
