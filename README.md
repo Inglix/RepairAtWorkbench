@@ -16,3 +16,15 @@ That's why I was so happy to find the Repair at Crafting Bench mod. Finally you 
 * Should be compatible with just about anything. Mods which add new workbenches or crafting recipes should be handled automatically.
 * Likely won't clash with other item repair mods, but why would you do that?
 * Safe to add to existing saves. Before attempting removal you should delete any existing repair bills from all workbenches.
+
+## Credits
+### swwu (Steven Wu)
+The author of the original [Repair at Crafting Bench](https://steamcommunity.com/sharedfiles/filedetails/?id=3222153156) mod which this continuation is based on.
+### NotFood (Charlotte)
+The author of [MendAndRecyle](https://steamcommunity.com/sharedfiles/filedetails/?id=735241897) which was active from RimWorld version A14 all the way to 1.4. Repair at Crafting Bench was forked from this mod so it wouldn't exist without MendAndRecycle.
+### topp2000
+Author of the A13 update of [Wastelander's Minor Mods: Mending](https://ludeon.com/forums/index.php?topic=19594.0) which MendAndRecycle was based on.
+### Skyarkhangel
+Author of the A12 update of Wastelander's Minor Mods: Mending.
+### Wastelander
+The original creator of Wasterlander's Minor Mods: Mending.
