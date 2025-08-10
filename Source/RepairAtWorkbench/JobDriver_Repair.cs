@@ -165,21 +165,21 @@ namespace RepairAtWorkbench
             };
         }
 
-        Toil Store ()
+        private Toil Store ()
         {
             return new Toil () {
                 initAction = delegate {
                     var objectThing = job.GetTarget (IngredientInd).Thing;
 
                     if (job.bill.GetStoreMode () != BillStoreModeDefOf.DropOnFloor) {
-                        IntVec3 vec = IntVec3.Invalid;
+                        var vec = IntVec3.Invalid;
                         if (job.bill.GetStoreMode() == BillStoreModeDefOf.BestStockpile)
                         {
-                            StoreUtility.TryFindBestBetterStoreCellFor(objectThing, pawn, pawn.Map, StoragePriority.Unstored, pawn.Faction, out vec, true);
+                            StoreUtility.TryFindBestBetterStoreCellFor(objectThing, pawn, pawn.Map, StoragePriority.Unstored, pawn.Faction, out vec);
                         }
                         else if (job.bill.GetStoreMode() == BillStoreModeDefOf.SpecificStockpile)
                         {
-                            StoreUtility.TryFindBestBetterStoreCellForIn(objectThing, pawn, pawn.Map, StoragePriority.Unstored, pawn.Faction, job.bill.GetSlotGroup(), out vec, true);
+                            StoreUtility.TryFindBestBetterStoreCellForIn(objectThing, pawn, pawn.Map, StoragePriority.Unstored, pawn.Faction, job.bill.GetSlotGroup(), out vec);
                         }
                         else
                         {
