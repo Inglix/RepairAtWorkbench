@@ -6,21 +6,16 @@ using Verse;
 
 namespace RepairAtWorkbench
 {
-    /// <summary>
-	/// The hub of the mod. 
-	/// </summary>
-    public class RepairAtWorkbenchController : Mod
+    public class RepairAtWorkbenchMod : Mod
     {
-        public static float REPAIR_WORK_MULT = 0.1f;
-        public static float REPAIR_INGREDIENT_MULT = 0.1f;
-        public static readonly FieldInfo _allRecipesCached = typeof(ThingDef).GetField("allRecipesCached", BindingFlags.Instance | BindingFlags.NonPublic);
+        private static readonly FieldInfo AllRecipesCached = typeof(ThingDef).GetField("allRecipesCached", BindingFlags.Instance | BindingFlags.NonPublic);
 
         // TODO: this should really just read recipedefs from XML that have a
         // specific flag set that marks them as "repair only", instead of being
         // hard-coded
 
         // workbenchDefName => (productdefname, skilldefname, number) pairs
-        public static Dictionary<string, List<(string, string, int)>> HARDCODED_REPAIRABLES = new Dictionary<string, List<(string, string, int)>>
+        private static readonly Dictionary<string, List<(string, string, int)>> HardcodedRepairables = new Dictionary<string, List<(string, string, int)>>
         {
             {
                 "HandTailoringBench",
@@ -44,7 +39,7 @@ namespace RepairAtWorkbench
             }
         };
 
-        public RepairAtWorkbenchController(ModContentPack content) : base(content)
+        public RepairAtWorkbenchMod(ModContentPack content) : base(content)
         {
         }
 
@@ -53,11 +48,11 @@ namespace RepairAtWorkbench
             return "Inglix.RepairAtWorkbench".Translate();
         }
 
-        public static void SetIngredientsForRepair(RecipeDef r, IEnumerable<ThingDef> thingDefs)
+        private static void SetIngredientsForRepair(RecipeDef r, IEnumerable<ThingDef> thingDefs)
 		{
             r.ingredients.Clear();
 
-			IngredientCount ingredientCount = new IngredientCount();
+			var ingredientCount = new IngredientCount();
             ingredientCount.SetBaseCount(1);
 
 			foreach (var thingDef in thingDefs)
@@ -69,34 +64,26 @@ namespace RepairAtWorkbench
 			r.ingredients.Add(ingredientCount);
 		}
 
-        public static bool IsBasicProductionRecipe(RecipeDef recipeDef)
+		private static bool IsBasicProductionRecipe(RecipeDef recipeDef)
         {
             // must be a recipe that creates only one type of thing, and that
-            // has an an unfinished state
+            // has an unfinished state
             if (!(recipeDef.unfinishedThingDef != null && recipeDef.products.Count == 1))
             {
                 return false;
             }
             // must be a non-bulk recipe which produces exactly one of the thing
-            ThingDefCountClass productAndCount = recipeDef.products.First();
+            var productAndCount = recipeDef.products.First();
             if (productAndCount == null || productAndCount.count != 1)
             {
                 return false;
             }
             // the thing must be either apparel or a weapon
-            ThingDef product = productAndCount.thingDef;
-            if (product == null || !(
-                product.IsApparel || product.IsWeapon
-                ))
-            {
-				return false;
-            }
-
-            return true;
+            var product = productAndCount.thingDef;
+            return product != null && (product.IsApparel || product.IsWeapon);
         }
 
-
-		public void CreateRepairRecipeForWorkbenchAndThingGroup(
+        private void CreateRepairRecipeForWorkbenchAndThingGroup(
             int skillDiffCategory,
             SkillDef skill,
 			ThingDef workBenchDef,
@@ -105,24 +92,26 @@ namespace RepairAtWorkbench
 		{
             if (repairablesForWorkbenchAndWg.Count == 0) { return; }
 
-            string logicalName = workBenchDef.defName + "_" + (skill?.defName ?? "NoSkill") + "_" + skillDiffCategory;
-            string label = "";
+            var logicalName = workBenchDef.defName + "_" + (skill?.defName ?? "NoSkill") + "_" + skillDiffCategory;
+            string label;
             // in theory these two conditions should be identical
             if (skill == null || skillDiffCategory == 0)
             {
                 label = "Repair simple items";
-            } else if (skillDiffCategory == 1)
+            } else switch (skillDiffCategory)
             {
-                label = "Repair complex " + skill.label + " items";
-            } else if (skillDiffCategory == 2)
-            {
-                label = "Repair advanced " + skill.label + " items";
-            } else if (skillDiffCategory == 3)
-            {
-                label = "Repair hyper-advanced " + skill.label + " items";
-            } else 
-            {
-                label = "Repair impossibly high-skilled (" + skillDiffCategory + ") " + skill.label + " items";
+	            case 1:
+		            label = "Repair complex " + skill.label + " items";
+		            break;
+	            case 2:
+		            label = "Repair advanced " + skill.label + " items";
+		            break;
+	            case 3:
+		            label = "Repair hyper-advanced " + skill.label + " items";
+		            break;
+	            default:
+		            label = "Repair impossibly high-skilled (" + skillDiffCategory + ") " + skill.label + " items";
+		            break;
             }
 
             if (repairablesForWorkbenchAndWg.Count == 0) { return; }
@@ -186,7 +175,7 @@ namespace RepairAtWorkbench
             DefDatabase<RecipeDef>.Add(repairRecipe);
 
             // clear the cache, since we just changed the recipes
-            _allRecipesCached.SetValue(workBenchDef, null);
+            AllRecipesCached.SetValue(workBenchDef, null);
 		}
 
 		public void DefsLoaded()
@@ -199,44 +188,36 @@ namespace RepairAtWorkbench
 			var workbenchToWorkGiver = new Dictionary<ThingDef, WorkGiverDef>();
 
 			// find every workgiver type that uses bills and operates on workbenches
-			foreach (WorkGiverDef wgDef in DefDatabase<WorkGiverDef>.AllDefs)
+			foreach (var workGiverDef in DefDatabase<WorkGiverDef>.AllDefs)
 			{
-				if (wgDef.giverClass == typeof(WorkGiver_DoBill)
-					&& wgDef.fixedBillGiverDefs != null
-					&& wgDef.fixedBillGiverDefs.Count > 0)
+				if (workGiverDef.giverClass != typeof(WorkGiver_DoBill)
+				    || workGiverDef.fixedBillGiverDefs == null
+				    || workGiverDef.fixedBillGiverDefs.Count <= 0) continue;
+				foreach (var fixedGiver in workGiverDef.fixedBillGiverDefs)
 				{
-					foreach (var fixedGiver in wgDef.fixedBillGiverDefs)
+					// ensure that each workbench only has one workgiver.
+					// If it has more than one, then we ignore that
+					// workbench for generating repair bills later
+					if (workbenchToWorkGiver.ContainsKey(fixedGiver))
 					{
-						// ensure that each workbench only has one workgiver.
-						// If it has more than one, then we ignore that
-						// workbench for generating repair bills later
-						if (workbenchToWorkGiver.ContainsKey(fixedGiver))
-						{
-							repairables.Remove(fixedGiver);
-							continue;
-						}
-
-						if (fixedGiver?.building?.buildingTags?.Contains("Production") == true)
-						{
-                            if (!repairables.ContainsKey(fixedGiver))
-                            {
-                                repairables.Add(fixedGiver, (wgDef, new List<(RecipeDef, ThingDef)>()));
-                            }
-                            var repairablesForWorkbenchAndWg = repairables.TryGetValue(fixedGiver).Item2;
-
-							foreach (RecipeDef recipe in fixedGiver.AllRecipes)
-							{
-								if (IsBasicProductionRecipe(recipe))
-								{
-									ThingDef product = recipe.products?.First()?.thingDef;
-									if (product != null)
-									{
-                                        repairablesForWorkbenchAndWg.Add((recipe, product));
-									}
-								}
-							}
-						}
+						repairables.Remove(fixedGiver);
+						continue;
 					}
+
+					if (fixedGiver.building?.buildingTags?.Contains("Production") != true) continue;
+					
+					workbenchToWorkGiver.Add(fixedGiver, workGiverDef);
+					if (!repairables.ContainsKey(fixedGiver))
+					{
+						repairables.Add(fixedGiver, (workGiverDef, new List<(RecipeDef, ThingDef)>()));
+					}
+					
+					var repairablesForWorkbenchAndWg = repairables.TryGetValue(fixedGiver).Item2;
+					repairablesForWorkbenchAndWg.AddRange(
+						from recipe in fixedGiver.AllRecipes 
+						where IsBasicProductionRecipe(recipe) 
+						let product = recipe.products?.First()?.thingDef 
+						where product != null select (recipe, product));
 				}
 			}
 
@@ -245,23 +226,23 @@ namespace RepairAtWorkbench
 				if (repairablesForWorkbenchAndWg.Count == 0) { continue; }
 
                 var hardcodedRepairables = (
-                    HARDCODED_REPAIRABLES.ContainsKey(workbenchDef.defName)
-                    ?  HARDCODED_REPAIRABLES[workbenchDef.defName]
+                    HardcodedRepairables.TryGetValue(workbenchDef.defName, out var repairable)
+                    ?  repairable
                     : new List<(string, string, int)>()
-                ).Select((thingAndSkillAndSkillLevel) => (
+                ).Select(thingAndSkillAndSkillLevel => (
                     DefDatabase<ThingDef>.GetNamed(thingAndSkillAndSkillLevel.Item1, false),
                     DefDatabase<SkillDef>.GetNamed(thingAndSkillAndSkillLevel.Item2, false),
                     thingAndSkillAndSkillLevel.Item3
-                )).Where((thingAndSkillAndSkillLevel) => thingAndSkillAndSkillLevel.Item1 != null);
+                )).Where(thingAndSkillAndSkillLevel => thingAndSkillAndSkillLevel.Item1 != null);
 
                 var thingsBySkillAndDifficultyType = new Dictionary<(int, SkillDef), List<(RecipeDef, ThingDef)>>();
                 foreach (var (recipeDef, productDef) in repairablesForWorkbenchAndWg)
                 {
                     var highestSkillPair = Utils.GetHighestRequiredSkillAndValue(recipeDef.skillRequirements);
-                    int skillCategory = Utils.SkillToSkillDiffCategory(highestSkillPair.Item1);
+                    var skillCategory = Utils.SkillToSkillDiffCategory(highestSkillPair.Item1);
 
                     // if the required skill is sufficiently low, then we don't care about skill
-                    var key = (skillCategory, (skillCategory > 0) ? highestSkillPair.Item2 : null);
+                    var key = (skillCategory, skillCategory > 0 ? highestSkillPair.Item2 : null);
                     if (!thingsBySkillAndDifficultyType.ContainsKey(key))
                     {
                         thingsBySkillAndDifficultyType.Add(key, new List<(RecipeDef, ThingDef)>());
@@ -271,7 +252,7 @@ namespace RepairAtWorkbench
 
                 foreach (var r in hardcodedRepairables)
                 {
-                    (int, SkillDef) key = (Utils.SkillToSkillDiffCategory(r.Item3), r.Item2);
+                    var key = (Utils.SkillToSkillDiffCategory(r.Item3), r.Item2);
 
                     if (!thingsBySkillAndDifficultyType.ContainsKey(key))
                     {
@@ -282,7 +263,7 @@ namespace RepairAtWorkbench
 
                 foreach (var ((skillDiffCategory, skillDef), repairablesFor) in thingsBySkillAndDifficultyType)
                 {
-                    Log.Message("Adding " + repairablesFor.Count + " repair tasks for " + workbenchDef.defName + ":" + (skillDef?.ToString() ?? "NoSkill") + ":" + skillDiffCategory);
+                    Log.Message("Adding " + repairablesFor.Count + " repair tasks for " + workbenchDef.defName + ":" + (skillDef?.ToString() ?? "NoSkill") + " : " + skillDiffCategory);
 
                     CreateRepairRecipeForWorkbenchAndThingGroup(
                         skillDiffCategory, skillDef, workbenchDef, repairablesFor

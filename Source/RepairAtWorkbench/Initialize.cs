@@ -13,7 +13,7 @@ namespace RepairAtWorkbench
         static Initialize()
         {
             new Harmony("Inglix.RepairAtWorkbench").PatchAll(Assembly.GetExecutingAssembly());
-            var controller = LoadedModManager.GetMod<RepairAtWorkbenchController>();
+            var controller = LoadedModManager.GetMod<RepairAtWorkbenchMod>();
             controller.DefsLoaded();
         }
     }
