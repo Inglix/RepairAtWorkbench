@@ -1,33 +1,30 @@
 ﻿using RimWorld;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Verse;
 
 namespace RepairAtWorkbench
 {
     public static class Utils
     {
-
         public static int SkillToSkillDiffCategory(int skill)
         {
             return (int)Math.Floor(skill / 6f); ;
         }
 
-        public static (int, SkillDef) GetHighestSkillAndValue(List<SkillRequirement> skrs)
+        public static (int, SkillDef) GetHighestRequiredSkillAndValue(List<SkillRequirement> skillRequirements)
         {
-            (int, SkillDef) ret = (0, null);
+            (int, SkillDef) returnValue = (0, null);
 
-            if (skrs == null) { return ret; }
+            if (skillRequirements == null) { return returnValue; }
 
-            foreach(var skr in skrs)
+            foreach (var skillRequirement in skillRequirements.Where(skillRequirement => skillRequirement.minLevel > returnValue.Item1))
             {
-                if (skr.minLevel > ret.Item1)
-                {
-                    ret.Item1 = skr.minLevel;
-                    ret.Item2 = skr.skill;
-                }
+                returnValue.Item1 = skillRequirement.minLevel;
+                returnValue.Item2 = skillRequirement.skill;
             }
-            return ret;
+            return returnValue;
         }
     }
 }

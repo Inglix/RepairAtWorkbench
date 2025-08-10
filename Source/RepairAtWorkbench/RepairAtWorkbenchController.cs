@@ -257,7 +257,7 @@ namespace RepairAtWorkbench
                 var thingsBySkillAndDifficultyType = new Dictionary<(int, SkillDef), List<(RecipeDef, ThingDef)>>();
                 foreach (var (recipeDef, productDef) in repairablesForWorkbenchAndWg)
                 {
-                    var highestSkillPair = Utils.GetHighestSkillAndValue(recipeDef.skillRequirements);
+                    var highestSkillPair = Utils.GetHighestRequiredSkillAndValue(recipeDef.skillRequirements);
                     int skillCategory = Utils.SkillToSkillDiffCategory(highestSkillPair.Item1);
 
                     // if the required skill is sufficiently low, then we don't care about skill
