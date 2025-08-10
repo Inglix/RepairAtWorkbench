@@ -44,7 +44,7 @@ namespace RepairAtWorkbench
             yield return Toils_Reserve.Release(BillGiverInd);
         }
 
-        int costHitPointsPerCycle;
+        int restoredHitPointsPerCycle;
         float workCycle;
         float workCycleProgress;
 
@@ -52,7 +52,7 @@ namespace RepairAtWorkbench
         {
             base.ExposeData();
 
-            Scribe_Values.Look(ref costHitPointsPerCycle, "costHitPointsPerCycle", 1);
+            Scribe_Values.Look(ref restoredHitPointsPerCycle, "costHitPointsPerCycle", 1);
             Scribe_Values.Look(ref workCycle, "workCycle", 1f);
             Scribe_Values.Look(ref workCycleProgress, "workCycleProgress", 1f);
         }
@@ -62,97 +62,107 @@ namespace RepairAtWorkbench
             return true;
         }
 
-        protected Toil DoBill()
+        private Toil DoBill()
         {
-            var tableThing = job.GetTarget(BillGiverInd).Thing as Building_WorkTable;
-            var refuelableComp = tableThing.GetComp<CompRefuelable>();
-
-            var toil = new Toil ();
-            toil.initAction = delegate {
-                var objectThing = job.GetTarget(IngredientInd).Thing;
-
-                job.bill.Notify_DoBillStarted(pawn);
-
-                costHitPointsPerCycle = (int)(objectThing.MaxHitPoints * 0.05f / Settings.techCostFactor[objectThing.def.techLevel]);
-
-                workCycleProgress = workCycle = Math.Max(job.bill.recipe.workAmount, 10f);
-            };
-            toil.tickAction = delegate
+            if (job.GetTarget(BillGiverInd).Thing is Building_WorkTable tableThing)
             {
-                var objectThing = job.GetTarget(IngredientInd).Thing;
+                var refuelableComp = tableThing.GetComp<CompRefuelable>();
 
-                if (objectThing == null || objectThing.Destroyed)
+                var toil = new Toil
                 {
-                    pawn.jobs.EndCurrentJob(JobCondition.Incompletable);
-                }
-
-                workCycleProgress -= StatExtension.GetStatValue(pawn, StatDefOf.WorkToMake, true);
-
-                tableThing.UsedThisTick();
-            };
-            toil.tickIntervalAction = delegate(int delta)
-            {
-                var objectThing = job.GetTarget(IngredientInd).Thing;
-                if (! (tableThing.CurrentlyUsableForBills() && (refuelableComp == null || refuelableComp.HasFuel)) ) {
-                    pawn.jobs.EndCurrentJob (JobCondition.Incompletable);
-                }
-
-                if (workCycleProgress <= 0) {
-                    int remainingHitPoints = objectThing.MaxHitPoints - objectThing.HitPoints;
-                    if (remainingHitPoints > 0) {
-                        objectThing.HitPoints += (int) Math.Min(remainingHitPoints, costHitPointsPerCycle);
-                    }
-
-                    float skillPerc = 0.5f;
-
-                    var skillDef = job.RecipeDef.workSkill;
-                    if (skillDef != null) {
-                        var skill = pawn.skills.GetSkill (skillDef);
-
-                        if (skill != null) {
-                            skillPerc = (float)skill.Level / 20f;
-
-                            skill.Learn (0.11f * job.RecipeDef.workSkillLearnFactor);
+                    initAction = delegate
+                    {
+                        var objectThing = job.GetTarget(IngredientInd).Thing;
+                        job.bill.Notify_DoBillStarted(pawn);
+                        restoredHitPointsPerCycle = Math.Max(1, (int)(objectThing.MaxHitPoints * 0.05f / Settings.techCostFactor[objectThing.def.techLevel]));
+                        workCycleProgress = workCycle = Math.Max(job.bill.recipe.workAmount, 10f);
+                    },
+                    tickAction = delegate
+                    {
+                        var objectThing = job.GetTarget(IngredientInd).Thing;
+                        if (objectThing == null || objectThing.Destroyed)
+                        {
+                            pawn.jobs.EndCurrentJob(JobCondition.Incompletable);
                         }
-                    }
 
-                    pawn.GainComfortFromCellIfPossible(delta);
+                        // Grabbing StatDefOf.WorkToMake from pawn is always going to return 1f; what the heck was the idea here?
+                        // workCycleProgress -= pawn.GetStatValue(StatDefOf.WorkToMake);
+                        workCycleProgress--;
+                        tableThing.UsedThisTick();
+                    },
+                    tickIntervalAction = delegate(int delta)
+                    {
+                        var objectThing = job.GetTarget(IngredientInd).Thing;
+                        if (!(tableThing.CurrentlyUsableForBills() && (refuelableComp == null || refuelableComp.HasFuel)))
+                        {
+                            pawn.jobs.EndCurrentJob(JobCondition.Incompletable);
+                        }
+                        
+                        var skillDef = job.RecipeDef.workSkill;
+                        if (skillDef != null)
+                        {
+                            var skill = pawn.skills.GetSkill(skillDef);
+                            skill?.Learn(0.1f * delta * job.RecipeDef.workSkillLearnFactor);
+                            //TODO: Take a closer look at the workSkillLearnFactor values in this
+                            //mod to make sure skill isn't gained faster by repairing than it is by crafting
+                        }
 
-                    if (objectThing.HitPoints == objectThing.MaxHitPoints) {
-                        // fixed!
+                        pawn.GainComfortFromCellIfPossible(delta);
 
-                        // removes deadman
-                        //if (objectThing is Apparel mendApparel) {
-                        //    ApparelWornByCorpseInt.SetValue(mendApparel, false);
-                        //}
+                        if (!(workCycleProgress <= 0)) return;
+                        var missingHitPoints = objectThing.MaxHitPoints - objectThing.HitPoints;
+                        if (missingHitPoints > 0)
+                        {
+                            objectThing.HitPoints += Math.Min(missingHitPoints, restoredHitPointsPerCycle);
+                        }
+                        
+                        if (objectThing.HitPoints > objectThing.MaxHitPoints)
+                        {
+                            Log.Warning("RepairAtWorkbench - HitPoints exceeded MaxHitPoints for " + objectThing + ". Clamping to MaxHitPoints.");
+                            objectThing.HitPoints = objectThing.MaxHitPoints;
+                        }
+                        
+                        if (objectThing.HitPoints.Equals(objectThing.MaxHitPoints))
+                        {
+                            // fixed!
 
-                        var list = new List<Thing> ();
-                        list.Add(objectThing);
-                        job.bill.Notify_IterationCompleted (pawn, list);
+                            // removes deadman
+                            //if (objectThing is Apparel mendApparel) {
+                            //    ApparelWornByCorpseInt.SetValue(mendApparel, false);
+                            //}
+                            
+                            //TODO: Add mod setting for whether this removes tainted apparel 
 
-                        ReadyForNextToil();
+                            var list = new List<Thing> { objectThing };
+                            job.bill.Notify_IterationCompleted(pawn, list);
+                            ReadyForNextToil();
+                        }
 
-                    } else if (objectThing.HitPoints > objectThing.MaxHitPoints) {
-                        Log.Error("MendAndRecycle :: This should never happen! HitPoints > MaxHitPoints");
-                        pawn.jobs.EndCurrentJob (JobCondition.Incompletable);
-                    }
+                        workCycleProgress = workCycle;
+                    },
+                    defaultCompleteMode = ToilCompleteMode.Never
+                };
+                toil.WithEffect(() => job.GetTarget(IngredientInd).Thing.def.recipeMaker.effectWorking, BillGiverInd);
+                toil.PlaySustainerOrSound(() => job.GetTarget(IngredientInd).Thing.def.recipeMaker.soundWorking);
+                toil.WithProgressBar(BillGiverInd, () =>
+                {
+                    var objectThing = job.GetTarget(IngredientInd).Thing;
+                    return (float)objectThing.HitPoints / objectThing.MaxHitPoints;
+                }, false, 0.5f);
+                toil.FailOn(() =>
+                {
+                    var billGiver = job.GetTarget(BillGiverInd).Thing as IBillGiver;
 
-                    workCycleProgress = workCycle;
-                }
+                    return job.bill.suspended || job.bill.DeletedOrDereferenced || (billGiver != null && !billGiver.CurrentlyUsableForBills());
+                });
+                return toil;
+            }
+
+            Log.Error("RepairAtCrafingBench - DoBill() called on non-worktable thing: " + job.GetTarget(BillGiverInd).Thing);
+            return new Toil()
+            {
+                initAction = delegate { pawn.jobs.EndCurrentJob(JobCondition.Incompletable); }
             };
-            toil.defaultCompleteMode = ToilCompleteMode.Never;
-            toil.WithEffect (() => job.bill.recipe.effectWorking, BillGiverInd);
-            toil.PlaySustainerOrSound (() => toil.actor.CurJob.bill.recipe.soundWorking);
-            toil.WithProgressBar(BillGiverInd, () => {
-                var objectThing = job.GetTarget(IngredientInd).Thing;
-                return (float)objectThing.HitPoints / (float)objectThing.MaxHitPoints;
-            }, false, 0.5f);
-            toil.FailOn(() => {
-                var billGiver = job.GetTarget (BillGiverInd).Thing as IBillGiver;
-
-                return job.bill.suspended || job.bill.DeletedOrDereferenced || (billGiver != null && !billGiver.CurrentlyUsableForBills ());
-            });
-            return toil;
         }
 
         Toil Store ()
