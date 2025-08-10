@@ -12,6 +12,14 @@ That's why I was so happy to find the Repair at Crafting Bench mod. Finally you 
 * Different repair bills are created to group items by their crafting skill requirements
 * Repairing only requires time and doesn't consume any type of crafting resources
 
+## Planned Updates
+* Mod settings to allow customization of the repair process such as skill requirements, skill gains, time required, etc.
+* Handling of items which are not normally craftable from any workbench without needing hard-coded exceptions
+
+## Frequently Asked Questions
+### Do I still need HugsLib for this version?
+No, I've removed the dependency on HugsLib entirely. 
+
 ## Compatibility
 * Should be compatible with just about anything. Mods which add new workbenches or crafting recipes should be handled automatically.
 * Likely won't clash with other item repair mods, but why would you do that?
@@ -45,6 +53,6 @@ The original creator of Wasterlander's Minor Mods: Mending.
 ## License 
 ![by-nc-sa](/About/by-nc-sa.png)
 
-Imprisonment On The Go! (Continued) © 2024 by Inglix is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) 
+Repair at Crafting Bench (Continued) © 2025 by Inglix is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) 
 
 This license enables reusers to distribute, remix, adapt, and build upon the material in any medium or format for noncommercial purposes only, and only so long as attribution is given to the creator. If you remix, adapt, or build upon the material, you must license the modified material under identical terms.
