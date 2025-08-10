@@ -25,7 +25,7 @@ namespace RepairAtWorkbench.Patches.Core
 
             if (job != null && job.def == JobDefOf.DoBill && job.RecipeDef.Worker is RecipeWorker_Repair worker)
             {
-                __result = new Job(ResourceBank.Job.RepairAtWorkbench, job.targetA)
+                __result = new Job(ResourceBank.Job.RepairAtCraftingBench, job.targetA)
                 {
                     targetQueueB = job.targetQueueB,
                     countQueue = job.countQueue,

@@ -286,7 +286,7 @@ namespace RepairAtWorkbench
 
                 foreach (var ((skillDiffCategory, skillDef), repairablesFor) in thingsBySkillAndDifficultyType)
                 {
-                    Log.Message("Adding repair tasks for " + workbenchDef.defName + ":" + (skillDef?.ToString() ?? "NoSkill") + ":" + skillDiffCategory);
+                    Log.Message("Adding " + repairablesFor.Count + " repair tasks for " + workbenchDef.defName + ":" + (skillDef?.ToString() ?? "NoSkill") + ":" + skillDiffCategory);
 
                     CreateRepairRecipeForWorkbenchAndThingGroup(
                         skillDiffCategory, skillDef, workbenchDef, repairablesFor

@@ -25,7 +25,7 @@ namespace RepairAtWorkbench
         [DefOf]
         public static class Job
         {
-            public static JobDef RepairAtWorkbench;
+            public static JobDef RepairAtCraftingBench;
         }
 
         /*

@@ -11,7 +11,7 @@ using Verse.AI;
 
 namespace RepairAtWorkbench
 {
-    public class JobDriver_Repair : Verse.AI.JobDriver_DoBill
+    public class JobDriver_Repair : JobDriver_DoBill
     {
         readonly FieldInfo ApparelWornByCorpseInt = typeof(Apparel).GetField("wornByCorpseInt", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance);
 
@@ -94,17 +94,22 @@ namespace RepairAtWorkbench
 
                 workCycleProgress = workCycle = Math.Max(job.bill.recipe.workAmount, 10f);
             };
-            toil.tickAction = delegate {
+            toil.tickAction = delegate
+            {
                 var objectThing = job.GetTarget(IngredientInd).Thing;
 
-                if (objectThing == null || objectThing.Destroyed) {
-                    pawn.jobs.EndCurrentJob (JobCondition.Incompletable);
+                if (objectThing == null || objectThing.Destroyed)
+                {
+                    pawn.jobs.EndCurrentJob(JobCondition.Incompletable);
                 }
 
-                workCycleProgress -= StatExtension.GetStatValue (pawn, StatDefOf.WorkToMake, true);
+                workCycleProgress -= StatExtension.GetStatValue(pawn, StatDefOf.WorkToMake, true);
 
-                tableThing.UsedThisTick ();
-
+                tableThing.UsedThisTick();
+            };
+            toil.tickIntervalAction = delegate(int delta)
+            {
+                var objectThing = job.GetTarget(IngredientInd).Thing;
                 if (! (tableThing.CurrentlyUsableForBills() && (refuelableComp == null || refuelableComp.HasFuel)) ) {
                     pawn.jobs.EndCurrentJob (JobCondition.Incompletable);
                 }
@@ -128,7 +133,7 @@ namespace RepairAtWorkbench
                         }
                     }
 
-                    pawn.GainComfortFromCellIfPossible ();
+                    pawn.GainComfortFromCellIfPossible(delta);
 
                     if (objectThing.HitPoints == objectThing.MaxHitPoints) {
                         // fixed!
@@ -181,7 +186,7 @@ namespace RepairAtWorkbench
                         }
                         else if (job.bill.GetStoreMode() == BillStoreModeDefOf.SpecificStockpile)
                         {
-                            StoreUtility.TryFindBestBetterStoreCellForIn(objectThing, pawn, pawn.Map, StoragePriority.Unstored, pawn.Faction, job.bill.GetStoreZone().slotGroup, out vec, true);
+                            StoreUtility.TryFindBestBetterStoreCellForIn(objectThing, pawn, pawn.Map, StoragePriority.Unstored, pawn.Faction, job.bill.GetSlotGroup(), out vec, true);
                         }
                         else
                         {
