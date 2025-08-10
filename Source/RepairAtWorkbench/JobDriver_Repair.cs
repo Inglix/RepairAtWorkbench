@@ -22,20 +22,8 @@ namespace RepairAtWorkbench
                 return JobCondition.Ongoing;
             });
             this.FailOnBurningImmobile(BillGiverInd);
-            this.FailOn(delegate {
-                if (job.GetTarget(BillGiverInd).Thing is IBillGiver billGiver)
-                {
-                    if (job.bill.DeletedOrDereferenced)
-                    {
-                        return true;
-                    }
-                    if (!billGiver.CurrentlyUsableForBills())
-                    {
-                        return true;
-                    }
-                }
-                return false;
-            });
+            this.FailOn(() => job.GetTarget(BillGiverInd).Thing is IBillGiver billGiver &&
+                              (job.bill.DeletedOrDereferenced || !billGiver.CurrentlyUsableForBills()));
 
             yield return Toils_Reserve.Reserve(BillGiverInd, 1);
             yield return Toils_Reserve.ReserveQueue(IngredientInd, 1);
@@ -54,7 +42,6 @@ namespace RepairAtWorkbench
             yield return Toils_Reserve.Release(IngredientInd);
             yield return Toils_Reserve.Release(IngredientPlaceCellInd);
             yield return Toils_Reserve.Release(BillGiverInd);
-            yield break;
         }
 
         int costHitPointsPerCycle;
