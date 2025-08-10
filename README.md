@@ -24,7 +24,9 @@ If you believe you have discovered a bug in this mod, please report it and inclu
   * Have either [HugsLib](https://steamcommunity.com/sharedfiles/filedetails/818773962) or [Log Publisher from HugsLib](https://steamcommunity.com/sharedfiles/filedetails/2873415404) in your active mod list.
   * Press _Ctrl-F12_ in-game after the bug occurs and then follow the on-screen instructions.
 
-## Credits
+## Credits / Acknowledgements
+### Inglix
+Updating the mod for RimWorld 1.6.
 ### swwu (Steven Wu)
 The author of the original [Repair at Crafting Bench](https://steamcommunity.com/sharedfiles/filedetails/?id=3222153156) mod which this continuation is based on.
 ### NotFood (Charlotte)
@@ -39,3 +41,10 @@ The author of the A13 update of [Wastelander's Minor Mods: Mending](https://lude
 The author of the A12 update of Wastelander's Minor Mods: Mending.
 ### Wastelander
 The original creator of Wasterlander's Minor Mods: Mending.
+
+## License 
+![by-nc-sa](/About/by-nc-sa.png)
+
+Imprisonment On The Go! (Continued) © 2024 by Inglix is licensed under [CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/) 
+
+This license enables reusers to distribute, remix, adapt, and build upon the material in any medium or format for noncommercial purposes only, and only so long as attribution is given to the creator. If you remix, adapt, or build upon the material, you must license the modified material under identical terms.
