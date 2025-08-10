@@ -1,5 +1,4 @@
 ﻿using HarmonyLib;
-using HugsLib;
 using RimWorld;
 using System;
 using System.Collections;
@@ -15,7 +14,7 @@ namespace RepairAtWorkbench
     /// <summary>
 	/// The hub of the mod. 
 	/// </summary>
-    public class RepairAtWorkbenchController : ModBase
+    public class RepairAtWorkbenchController : Mod
     {
         public static float REPAIR_WORK_MULT = 0.1f;
         public static float REPAIR_INGREDIENT_MULT = 0.1f;
@@ -50,10 +49,13 @@ namespace RepairAtWorkbench
             }
         };
 
-        public override string ModIdentifier
+        public RepairAtWorkbenchController(ModContentPack content) : base(content)
         {
-            get { return "swwu.RepairAtWorkbench";  }
+        }
 
+        public override string SettingsCategory()
+        {
+            return "Inglix.RepairAtWorkbench".Translate();
         }
 
         public static void SetIngredientsForRepair(RecipeDef r, IEnumerable<ThingDef> thingDefs)
@@ -138,7 +140,7 @@ namespace RepairAtWorkbench
                 defName = "RAW_RepairAt_" + logicalName,
                 label = label,
                 jobString = "Repairing",
-                modContentPack = this.ModContentPack,
+                modContentPack = Content,
                 displayPriority = 0,
                 workAmount = 100,
                 workSpeedStat = StatDefOf.GeneralLaborSpeed,//firstRecipe.workSpeedStat,
@@ -192,9 +194,8 @@ namespace RepairAtWorkbench
             _allRecipesCached.SetValue(workBenchDef, null);
 		}
 
-		public override void DefsLoaded() {
-			if (!this.ModIsActive) return;
-
+		public void DefsLoaded()
+		{
 			// defs are global and immutable in gameplay, so it's safe to use them
 			// as dictionary keys (as they will just be reference-compared)
 
