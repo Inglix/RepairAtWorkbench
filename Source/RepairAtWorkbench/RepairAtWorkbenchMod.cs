@@ -95,11 +95,15 @@ namespace RepairAtWorkbench
             var logicalName = workBenchDef.defName + "_" + (skill?.defName ?? "NoSkill") + "_" + skillDiffCategory;
             string label;
             // in theory these two conditions should be identical
-            if (skill == null || skillDiffCategory == 0)
+            if (skill == null)
             {
                 label = "Repair simple items";
-            } else switch (skillDiffCategory)
+            }
+            else switch (skillDiffCategory)
             {
+	            case 0:
+		            label = "Repair simple " + skill.label + " items";
+		            break;
 	            case 1:
 		            label = "Repair complex " + skill.label + " items";
 		            break;
@@ -238,11 +242,10 @@ namespace RepairAtWorkbench
                 var thingsBySkillAndDifficultyType = new Dictionary<(int, SkillDef), List<(RecipeDef, ThingDef)>>();
                 foreach (var (recipeDef, productDef) in repairablesForWorkbenchAndWg)
                 {
-                    var highestSkillPair = Utils.GetHighestRequiredSkillAndValue(recipeDef.skillRequirements);
+                    var highestSkillPair = Utils.GetHighestRequiredSkillAndValue(recipeDef);
                     var skillCategory = Utils.SkillToSkillDiffCategory(highestSkillPair.Item1);
 
-                    // if the required skill is sufficiently low, then we don't care about skill
-                    var key = (skillCategory, skillCategory > 0 ? highestSkillPair.Item2 : null);
+                    var key = (skillCategory, highestSkillPair.Item2);
                     if (!thingsBySkillAndDifficultyType.ContainsKey(key))
                     {
                         thingsBySkillAndDifficultyType.Add(key, new List<(RecipeDef, ThingDef)>());

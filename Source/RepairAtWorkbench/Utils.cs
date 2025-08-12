@@ -13,9 +13,10 @@ namespace RepairAtWorkbench
             return (int)Math.Floor(skill / 6f); ;
         }
 
-        public static (int, SkillDef) GetHighestRequiredSkillAndValue(List<SkillRequirement> skillRequirements)
+        public static (int, SkillDef) GetHighestRequiredSkillAndValue(RecipeDef recipeDef)
         {
-            (int, SkillDef) returnValue = (0, null);
+            var skillRequirements = recipeDef?.skillRequirements;
+            (int, SkillDef) returnValue = (0, recipeDef?.workSkill);
 
             if (skillRequirements == null) { return returnValue; }
 

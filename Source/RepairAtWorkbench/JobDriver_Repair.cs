@@ -142,8 +142,8 @@ namespace RepairAtWorkbench
                     },
                     defaultCompleteMode = ToilCompleteMode.Never
                 };
-                toil.WithEffect(() => job.GetTarget(IngredientInd).Thing.def.recipeMaker.effectWorking, BillGiverInd);
-                toil.PlaySustainerOrSound(() => job.GetTarget(IngredientInd).Thing.def.recipeMaker.soundWorking);
+                toil.WithEffect(() => job.GetTarget(IngredientInd).Thing.def.recipeMaker?.effectWorking, BillGiverInd);
+                toil.PlaySustainerOrSound(() => job.GetTarget(IngredientInd).Thing.def.recipeMaker?.soundWorking);
                 toil.WithProgressBar(BillGiverInd, () =>
                 {
                     var objectThing = job.GetTarget(IngredientInd).Thing;
